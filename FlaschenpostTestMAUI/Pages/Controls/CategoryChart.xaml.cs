@@ -1,0 +1,10 @@
+namespace FlaschenpostTestMAUI.Pages.Controls
+{
+    public partial class CategoryChart
+    {
+        public CategoryChart()
+        {
+            InitializeComponent();
+        }
+    }
+}

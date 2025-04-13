@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Border
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:effectsView="clr-namespace:Syncfusion.Maui.Toolkit.EffectsView;assembly=Syncfusion.Maui.Toolkit"
+    xmlns:pageModels="clr-namespace:FlaschenpostTestMAUI.PageModels"
+    xmlns:models="clr-namespace:FlaschenpostTestMAUI.Models"
+    xmlns:shimmer="clr-namespace:Syncfusion.Maui.Toolkit.Shimmer;assembly=Syncfusion.Maui.Toolkit"
+    x:Class="FlaschenpostTestMAUI.Pages.Controls.TaskView"
+    StrokeShape="RoundRectangle 20"
+    Background="{AppThemeBinding Light={StaticResource LightSecondaryBackground}, Dark={StaticResource DarkSecondaryBackground}}"
+    x:DataType="models:TodoItem">
+    
+    <effectsView:SfEffectsView
+        TouchDownEffects="Highlight"
+        HighlightBackground="{AppThemeBinding Light={StaticResource DarkOnLightBackground}, Dark={StaticResource LightOnDarkBackground}}">
+        <shimmer:SfShimmer
+            BackgroundColor="Transparent"
+            VerticalOptions="FillAndExpand"               
+            IsActive="{Binding IsBusy, Source={RelativeSource AncestorType={x:Type pageModels:IProjectTaskPageModel}}, x:DataType=pageModels:IProjectTaskPageModel}">
+            <shimmer:SfShimmer.CustomView>
+                <Grid 
+                    ColumnDefinitions="Auto,*"
+                    Padding="{OnIdiom 15, Desktop=20}">
+                    <BoxView 
+                        WidthRequest="24"
+                        HeightRequest="24"
+                        Margin="12, 0"
+                        Style="{StaticResource ShimmerCustomViewStyle}"/>
+                    <BoxView 
+                        Grid.Column="1"
+                        HeightRequest="24"
+                        Margin="12, 0"
+                        Style="{StaticResource ShimmerCustomViewStyle}"/>
+                </Grid>
+            </shimmer:SfShimmer.CustomView>
+            <shimmer:SfShimmer.Content>
+                <Grid ColumnDefinitions="Auto,*,auto" ColumnSpacing="15" Padding="{OnIdiom 15, Desktop=20}">
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer 
+                            Command="{Binding NavigateToTaskCommand, Source={RelativeSource AncestorType={x:Type pageModels:IProjectTaskPageModel}}, x:DataType=pageModels:IProjectTaskPageModel}" 
+                            CommandParameter="{Binding .}"/>
+                    </Grid.GestureRecognizers>
+                    <CheckBox Grid.Column="0" IsChecked="{Binding IsCompleted, Mode=OneTime}" VerticalOptions="Center" CheckedChanged="CheckBox_CheckedChanged"/>
+                    
+
+                    <VerticalStackLayout VerticalOptions="Start" Margin="0,0,0,10" Spacing="5"  Grid.Column="1" >
+                        <Label FontSize="Micro">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="Created time: "  FontAttributes="Bold" />
+                                    <Span Text="{Binding CreatedAt}" FontAttributes="Bold" />
+                                  
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                        <Label IsVisible="{Binding IsCompleted}" FontSize="Micro">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="Completed time: "  FontAttributes="Bold" />
+                                    <Span Text="{Binding CompletedAt}" FontAttributes="Bold" />
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                        <Label Text="{Binding Title}" FontSize="14" TextTransform="Uppercase"/>
+                        <Label Text="{Binding Description}" LineBreakMode="WordWrap"/>
+                    </VerticalStackLayout>
+
+                        <Border  Grid.Column="2" VerticalOptions="Start"  Stroke="#C49B33"
+                        StrokeThickness="2"
+                         StrokeShape="RoundRectangle 20,0,0,20"
+                         HorizontalOptions="End"
+                        Padding="4,4">
+                        <Label>
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="Priority: "  FontAttributes="Bold" FontSize="Micro" />
+                                    <Span Text="{Binding Priority}" FontAttributes="Bold" FontSize="Micro"  />
+
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                       
+                    </Border>
+                </Grid>
+            </shimmer:SfShimmer.Content>
+        </shimmer:SfShimmer>
+    </effectsView:SfEffectsView>
+</Border>
