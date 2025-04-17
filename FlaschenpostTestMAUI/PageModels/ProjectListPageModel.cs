@@ -35,41 +35,30 @@ namespace FlaschenpostTestMAUI.PageModels
         [RelayCommand]
         private async Task Appearing()
         {
-            var res = await _projectServiceManager.GetAllAsync();
-           if(res != null)
-            {
-                Projects = new ObservableCollection<Project>( res);
-            }
-            var resItem = await _todoItemServiceManager.GetAllAsync();
-            if(resItem != null)
-            {
-                var tasks = resItem.ToList();
+            Projects = new ObservableCollection<Project>(App.AppModel.Projects);
 
-                foreach (var project in Projects)
-                {
-                    project.Tasks = new ObservableCollection<TodoItem>(tasks.Where(t => t.ProjectId == project.Id).ToList());
-                }
-            }
-          
-            var categories = await _categoryServiceManager.GetAllAsync();
-            if(categories != null)
+            var tasks = App.AppModel.Tasks;
+            foreach (var project in Projects)
             {
-                TodoCategoryColors.Clear();
-                TodoCategoryData.Clear();
-                foreach (var project in Projects)
-                {
-                    project.Category = categories.Where(x => x.Id == project.CategoryId).FirstOrDefault();
-                }
-
-                foreach (var category in categories)
-                {
-                    TodoCategoryColors.Add(category.ColorBrush);
-                    var ps = Projects.Where(p => p.CategoryId == category.Id).ToList();
-                    int tasksCount = ps.SelectMany(p => p.Tasks).Count();
-
-                    TodoCategoryData.Add(new(category.Title, tasksCount));
-                }
+                project.Tasks = new ObservableCollection<TodoItem>(tasks.Where(t => t.ProjectId == project.Id).ToList());
             }
+
+            TodoCategoryColors.Clear();
+            TodoCategoryData.Clear();
+            var categories = App.AppModel.Categories;
+            foreach (var project in Projects)
+            {
+                project.Category = categories.Where(x => x.Id == project.CategoryId).FirstOrDefault();
+            }
+
+            foreach (var category in categories)
+            {
+                TodoCategoryColors.Add(category.ColorBrush);
+                var ps = Projects.Where(p => p.CategoryId == category.Id).ToList();
+                int tasksCount = ps.SelectMany(p => p.Tasks).Count();
+                TodoCategoryData.Add(new(category.Title, tasksCount));
+            }
+
         }
 
         [RelayCommand]

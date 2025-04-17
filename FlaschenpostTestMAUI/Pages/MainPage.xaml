@@ -53,7 +53,7 @@
                         <Grid  RowDefinitions="*,*">
                             <Label Grid.Row="0" Text="Tasks" Style="{StaticResource Title2}" VerticalOptions="Center"/>
                             <HorizontalStackLayout  Grid.Row="1" >
-                                <RadioButton x:Name="MyButton" Content="All" GroupName="Filter" IsChecked="{Binding IsAllChecked}" CheckedChanged="MyButton_CheckedChanged"  IsEnabled="True" >
+                                <RadioButton x:Name="MyButton" Content="All" GroupName="Filter" IsChecked="True" CheckedChanged="MyButton_CheckedChanged" >
                                 </RadioButton>
                                 <RadioButton  Content="Open" GroupName="Filter" IsChecked="{Binding IsOpenChecked}" CheckedChanged="MyButton_CheckedChanged">
                                 </RadioButton>

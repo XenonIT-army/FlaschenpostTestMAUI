@@ -32,8 +32,6 @@ namespace FlaschenpostTestMAUI.PageModels
         bool _isOpenChecked;
         [ObservableProperty]
         bool _isCompletedChecked;
-        [ObservableProperty]
-        bool _isAllChecked;
 
         [ObservableProperty]
         private string _today = DateTime.Now.ToString("dddd, MMM d");
@@ -49,7 +47,7 @@ namespace FlaschenpostTestMAUI.PageModels
             _todoItemServiceManager = todoItemServiceManager;
             _categoryServiceManager = categoryServiceManager;
             _projectServiceManager = projectServiceManager;
-            _dataLoaded = true;
+            _dataLoaded = false;
             LoadData();
         }
 
@@ -59,45 +57,44 @@ namespace FlaschenpostTestMAUI.PageModels
             {
                 IsBusy = true;
 
-                var res  = await _projectServiceManager.GetAllAsync();
-               if(res != null)
+                var resProgects  = await _projectServiceManager.GetAllAsync();
+               if(resProgects != null)
                 {
-                    Projects = new ObservableCollection<Project>(res.ToList());
+                    App.AppModel.Projects = resProgects.ToList();
+                    Projects = new ObservableCollection<Project>(App.AppModel.Projects);
                 }
 
                
-                //var chartData = new ObservableCollection<CategoryChartData>();
-                var chartColors = new ObservableCollection<Brush>();
-                var resItem = await _todoItemServiceManager.GetAllAsync();
-                if (resItem != null)
+                var resTasks = await _todoItemServiceManager.GetAllAsync();
+                if (resTasks != null)
                 {
-                    Tasks = new ObservableCollection<TodoItem>(resItem);
+                    App.AppModel.Tasks = resTasks.ToList();
+                    Tasks = new ObservableCollection<TodoItem>(App.AppModel.Tasks);
                     _tasksAll = new ObservableCollection<TodoItem>(Tasks);
+
+
                     foreach (var project in Projects)
                     {
                         project.Tasks = new ObservableCollection<TodoItem>(Tasks.Where(t => t.ProjectId == project.Id).ToList());
                     }
                     Filter();
                 }
-                var categories = await _categoryServiceManager.GetAllAsync();
-                if (categories != null)
+                var resCategories = await _categoryServiceManager.GetAllAsync();
+                if (resCategories != null)
                 {
-                    foreach (var category in categories)
+                    App.AppModel.Categories = resCategories.ToList();
+                    foreach (var category in App.AppModel.Categories)
                     {
-                        foreach (var project in Projects)
-                        {
-                            if(project.CategoryId == category.Id)
-                            {
-                                project.Category = category;
-                            }
-                        }
+
+                        var items = Projects.Where(x=> x.CategoryId == category.Id).ToList();
+                        items.ForEach(x => x.Category  = category);
                     }
                 }
             }
             finally
             {
                 IsBusy = false;
-                _dataLoaded = false;
+                _dataLoaded = true;
                 OnPropertyChanged(nameof(HasCompletedTasks));
             }
         }
@@ -122,31 +119,38 @@ namespace FlaschenpostTestMAUI.PageModels
 
         [RelayCommand]
         private void NavigatedTo() =>
-            _isNavigatedTo = true;
+            _isNavigatedTo = false;
 
         [RelayCommand]
         private void NavigatedFrom() =>
-            _isNavigatedTo = false;
+            _isNavigatedTo = true;
 
         [RelayCommand]
         private async Task Appearing()
         {
             if (!_dataLoaded)
             {
-                _dataLoaded = true;
                 await Refresh();
             }
-            // This means we are being navigated to
-            //else if (!_isNavigatedTo)
-            //{
-            //    await Refresh();
-            //}
+            else if (!_isNavigatedTo)
+            {
+                await Refresh();
+            }
+            else
+            {
+                UpdateModels();
+            }
         }
 
         [RelayCommand]
         private Task TaskCompleted(TodoItem task)
         {
             OnPropertyChanged(nameof(HasCompletedTasks));
+            var item = App.AppModel.Tasks.Where(x => x.Id == task.Id).FirstOrDefault();
+            if (item != null)
+            {
+                item = task;
+            }
             return _todoItemServiceManager.Update(task);
         }
 
@@ -196,13 +200,11 @@ namespace FlaschenpostTestMAUI.PageModels
             if (IsOpenChecked)
             {
                 Tasks = new ObservableCollection<TodoItem>(_tasksAll.Where(t => !t.IsCompleted));
-                IsAllChecked = false;
                 IsCompletedChecked = false;
             }
             else if (IsCompletedChecked)
             {
                 Tasks = new ObservableCollection<TodoItem>(_tasksAll.Where(t => t.IsCompleted));
-                IsAllChecked = false;
                 IsOpenChecked = false;
             }
             else
@@ -211,6 +213,17 @@ namespace FlaschenpostTestMAUI.PageModels
                 IsCompletedChecked = false;
                 IsOpenChecked = false;
             }
+        }
+
+        private void UpdateModels()
+        {
+            Tasks = new ObservableCollection<TodoItem>(App.AppModel.Tasks);
+            Projects = new ObservableCollection<Project>(App.AppModel.Projects);
+            foreach (var project in Projects)
+            {
+                project.Tasks = new ObservableCollection<TodoItem>(Tasks.Where(t => t.ProjectId == project.Id));
+            }
+            Filter();
         }
 
     }

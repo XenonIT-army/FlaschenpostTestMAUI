@@ -62,8 +62,6 @@ namespace FlaschenpostTestMAUI.PageModels
             _todoItemServiceManager = todoItemServiceManager;
             _categoryServiceManager = categoryServiceManager;
             _errorHandler = errorHandler;
-
-            Tasks = [];
         }
 
         public void ApplyQueryAttributes(IDictionary<string, object> query)
@@ -79,22 +77,13 @@ namespace FlaschenpostTestMAUI.PageModels
             }
             else
             {
-                Task.WhenAll(LoadCategories()).FireAndForgetSafeAsync(_errorHandler);
+                //Task.WhenAll(LoadCategories()).FireAndForgetSafeAsync(_errorHandler);
+                Categories = new ObservableCollection<Category>(App.AppModel.Categories);
                 _project = new();
                 _project.Tasks = [];
                 Tasks = new ObservableCollection<TodoItem>(_project.Tasks);
             }
         }
-
-        private async Task LoadCategories()
-        {
-            var res  = await _categoryServiceManager.GetAllAsync();
-            if (res != null)
-            {
-                Categories = new ObservableCollection<Category>(res);
-            }
-        }
-
         private async Task RefreshData()
         {
             if (_project.IsNullOrNew())
@@ -104,12 +93,8 @@ namespace FlaschenpostTestMAUI.PageModels
 
                 return;
             }
-            var items = await _todoItemServiceManager.GetAllAsync();
-            if (items != null)
-            {
-                Tasks = new ObservableCollection<TodoItem>(items.Where(t => t.ProjectId == _project.Id));
-                _project.Tasks = Tasks;
-            }
+            Tasks = new ObservableCollection<TodoItem>(App.AppModel.Tasks.Where(t => t.ProjectId == _project.Id));
+            _project.Tasks = Tasks;
         }
 
         private async Task LoadData()
@@ -129,14 +114,9 @@ namespace FlaschenpostTestMAUI.PageModels
                 Tasks = new ObservableCollection<TodoItem>(_project.Tasks);
 
                 Icon = _project.Icon;
-
-                var res = await _categoryServiceManager.GetAllAsync();
-                if (res != null)
-                {
-                    Categories = new ObservableCollection<Category>(res);
-                    Category = Categories?.FirstOrDefault(c => c.Id == _project.CategoryId);
-                    CategoryIndex = res.ToList()?.FindIndex(c => c.Id == _project.CategoryId) ?? -1;
-                }
+                Categories = new ObservableCollection<Category>(App.AppModel.Categories);
+                Category = Categories?.FirstOrDefault(c => c.Id == _project.CategoryId);
+                CategoryIndex = App.AppModel.Categories?.FindIndex(c => c.Id == _project.CategoryId) ?? -1;
             }
             catch (Exception e)
             {
@@ -153,6 +133,7 @@ namespace FlaschenpostTestMAUI.PageModels
         private async Task TaskCompleted(TodoItem task)
         {
             await _todoItemServiceManager.AddAsync(task);
+            App.AppModel.Tasks.Add(task);
             OnPropertyChanged(nameof(HasCompletedTasks));
         }
 
@@ -173,17 +154,26 @@ namespace FlaschenpostTestMAUI.PageModels
             _project.CategoryId = Category?.Id ?? 0;
             _project.Icon = Icon ?? FluentUI.ribbon_24_regular;
             if (_project.Id > 0)
+            {
                 _projectServiceManager.Update(_project).FireAndForgetSafeAsync(_errorHandler);
+                var item = App.AppModel.Projects.Where(x => x.Id == _project.Id).FirstOrDefault();
+                if (item != null)
+                {
+                    item = _project;
+                }
+            }
             else
             {
                 var res = await _projectServiceManager.AddAsync(_project);
+                App.AppModel.Projects.Add(res);
             }
             foreach (var task in _project.Tasks)
             {
                 if (task.Id == 0)
                 {
                     task.ProjectId = _project.Id;
-                    await _todoItemServiceManager.AddAsync(task);
+                    var item = await _todoItemServiceManager.AddAsync(task);
+                    App.AppModel.Tasks.Add(item);
                 }
             }
 
@@ -201,9 +191,6 @@ namespace FlaschenpostTestMAUI.PageModels
 
                 return;
             }
-
-            // Pass the project so if this is a new project we can just add
-            // the tasks to the project and then save them all from here.
             await Shell.Current.GoToAsync($"task",
                 new ShellNavigationQueryParameters(){
                     {TaskDetailPageModel.ProjectQueryKey, _project}
@@ -220,6 +207,7 @@ namespace FlaschenpostTestMAUI.PageModels
             }
 
             await _projectServiceManager.Delete(_project);
+            App.AppModel.Projects.Remove(_project);
             await Shell.Current.GoToAsync("..");
             await AppShell.DisplayToastAsync("Project deleted");
         }
@@ -235,6 +223,7 @@ namespace FlaschenpostTestMAUI.PageModels
             foreach (var task in completedTasks)
             {
                 await _todoItemServiceManager.Delete(task);
+                App.AppModel.Tasks.Remove(task);
                 Tasks.Remove(task);
             }
 

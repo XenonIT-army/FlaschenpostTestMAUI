@@ -91,21 +91,15 @@ namespace FlaschenpostTestMAUI.PageModels
                 _task = new TodoItem();
             }
 
-            // If the project is new, we don't need to load the project dropdown
             if (Project?.Id == 0)
             {
                 IsExistingProject = false;
             }
             else
             {
-                var res = await _projectServiceManager.GetAllAsync();
-                if(res != null)
-                {
-                    Projects = new ObservableCollection<Project>(res.ToList());
-                }
                 IsExistingProject = true;
             }
-
+            Projects = new ObservableCollection<Project>(App.AppModel.Projects);
             if (Project is not null)
                 SelectedProjectIndex = Projects.ToList().FindIndex(p => p.Id == Project.Id);
             else if (_task?.ProjectId > 0)
@@ -184,15 +178,22 @@ namespace FlaschenpostTestMAUI.PageModels
             }
 
             if (_task.Id > 0)
+            {
                 _todoItemServiceManager.Update(_task).FireAndForgetSafeAsync(_errorHandler);
+                var item = App.AppModel.Tasks.Where(x => x.Id == _task.Id).FirstOrDefault();
+                if (item != null)
+                {
+                    item = _task;
+                }
+            }
             else
             {
                 _task.CreatedAt = DateTime.Now;
                 var res = await _todoItemServiceManager.AddAsync(_task);
-                _task = res;
-                if(res != null)
+                if (res != null)
                 {
                     _task = res;
+                    App.AppModel.Tasks.Add(_task);
                     if (_task.Id > 0)
                         await AppShell.DisplayToastAsync("Task saved");
                 }
@@ -208,12 +209,14 @@ namespace FlaschenpostTestMAUI.PageModels
             {
                 _errorHandler.HandleError(
                     new Exception("Task is null. The task could not be deleted."));
-
                 return;
             }
 
             if (Project.Tasks.Contains(_task))
+            {
                 Project.Tasks.Remove(_task);
+                App.AppModel.Tasks.Remove(_task);
+            }
 
             if (_task.Id > 0)
                 await _todoItemServiceManager.Delete(_task);

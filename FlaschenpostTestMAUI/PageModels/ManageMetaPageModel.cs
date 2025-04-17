@@ -22,10 +22,7 @@ namespace FlaschenpostTestMAUI.PageModels
 
         private async Task LoadData()
         {
-            var categoriesList = await _categoryServiceManager.GetAllAsync();
-            if (categoriesList is null)
-                return;
-            Categories = new ObservableCollection<Category>(categoriesList);
+            Categories = new ObservableCollection<Category>(App.AppModel.Categories);
         }
 
         [RelayCommand]
@@ -38,9 +35,14 @@ namespace FlaschenpostTestMAUI.PageModels
             foreach (var category in Categories)
             {
                 await _categoryServiceManager.Update(category);
+                var item = App.AppModel.Categories.Where(x => x.Id == category.Id).FirstOrDefault();
+                if (item != null)
+                {
+                    item = category;
+                }
             }
-
             await AppShell.DisplayToastAsync("Categories saved");
+            await Shell.Current.GoToAsync("../?refresh=true");
         }
 
         [RelayCommand]
@@ -48,6 +50,7 @@ namespace FlaschenpostTestMAUI.PageModels
         {
             Categories.Remove(category);
             await _categoryServiceManager.Delete(category);
+            App.AppModel.Categories.Remove(category);
             await AppShell.DisplayToastAsync("Category deleted");
         }
 
@@ -56,7 +59,7 @@ namespace FlaschenpostTestMAUI.PageModels
         {
             var category = new Category();
             category = await _categoryServiceManager.AddAsync(category);
-
+            App.AppModel.Categories.Add(category);
             Categories.Add(category);
             await AppShell.DisplayToastAsync("Category added");
         }

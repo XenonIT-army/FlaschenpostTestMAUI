@@ -2,6 +2,7 @@
 {
     public partial class App : Application
     {
+        public static AppModel AppModel { get; private set; } = new AppModel();
         public App()
         {
             InitializeComponent();
