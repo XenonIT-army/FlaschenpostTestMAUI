@@ -28,10 +28,9 @@
     </ContentPage.Behaviors>
 
     <Grid>
-        <pullToRefresh:SfPullToRefresh 
-            IsRefreshing="{Binding IsRefreshing}"
-            RefreshCommand="{Binding RefreshCommand}">
-            <pullToRefresh:SfPullToRefresh.PullableContent>
+        <RefreshView  IsRefreshing="{Binding IsRefreshing}"
+  Command="{Binding RefreshCommand}">
+        
                 <ScrollView>
                     <VerticalStackLayout Spacing="{StaticResource LayoutSpacing}" Padding="{StaticResource LayoutPadding}">
                         <Label Text="Projects" Style="{StaticResource Title2}"/>
@@ -82,9 +81,7 @@
                         </VerticalStackLayout>
                     </VerticalStackLayout>
                 </ScrollView>
-            </pullToRefresh:SfPullToRefresh.PullableContent>
-        </pullToRefresh:SfPullToRefresh>
-
+        </RefreshView>
         <controls:AddButton 
             IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}"
             Command="{Binding AddTaskCommand}" />

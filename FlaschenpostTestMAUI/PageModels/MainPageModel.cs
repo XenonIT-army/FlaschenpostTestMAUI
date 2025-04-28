@@ -48,10 +48,9 @@ namespace FlaschenpostTestMAUI.PageModels
             _categoryServiceManager = categoryServiceManager;
             _projectServiceManager = projectServiceManager;
             _dataLoaded = false;
-            LoadData();
         }
 
-        private async void  LoadData()
+        private async Task LoadData()
         {
             try
             {
@@ -103,8 +102,7 @@ namespace FlaschenpostTestMAUI.PageModels
         {
             try
             {
-                IsRefreshing = true;
-                 LoadData();
+                 await LoadData();
               
             }
             catch (Exception e)
