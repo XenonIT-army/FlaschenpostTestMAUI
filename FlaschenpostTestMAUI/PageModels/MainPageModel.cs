@@ -10,7 +10,6 @@ namespace FlaschenpostTestMAUI.PageModels
     public partial class MainPageModel : ObservableObject, IProjectTaskPageModel
     {
         private bool _isNavigatedTo;
-        private bool _dataLoaded;
         private readonly ModalErrorHandler _errorHandler;
         private readonly IServiceManager<TodoItem> _todoItemServiceManager;
         private readonly IServiceManager<Project> _projectServiceManager;
@@ -25,6 +24,8 @@ namespace FlaschenpostTestMAUI.PageModels
 
         [ObservableProperty]
         bool _isBusy;
+        [ObservableProperty]
+        private bool _dataLoading;
 
         [ObservableProperty]
         bool _isRefreshing;
@@ -47,7 +48,7 @@ namespace FlaschenpostTestMAUI.PageModels
             _todoItemServiceManager = todoItemServiceManager;
             _categoryServiceManager = categoryServiceManager;
             _projectServiceManager = projectServiceManager;
-            _dataLoaded = false;
+            DataLoading = true;
         }
 
         private async Task LoadData()
@@ -69,7 +70,7 @@ namespace FlaschenpostTestMAUI.PageModels
                 {
                     App.AppModel.Tasks = resTasks.ToList();
                     Tasks = new ObservableCollection<TodoItem>(App.AppModel.Tasks);
-                    _tasksAll = new ObservableCollection<TodoItem>(Tasks);
+                    _tasksAll = new ObservableCollection<TodoItem>(App.AppModel.Tasks);
 
 
                     foreach (var project in Projects)
@@ -93,7 +94,7 @@ namespace FlaschenpostTestMAUI.PageModels
             finally
             {
                 IsBusy = false;
-                _dataLoaded = true;
+                DataLoading = false;
                 OnPropertyChanged(nameof(HasCompletedTasks));
             }
         }
@@ -126,7 +127,7 @@ namespace FlaschenpostTestMAUI.PageModels
         [RelayCommand]
         private async Task Appearing()
         {
-            if (!_dataLoaded)
+            if (DataLoading)
             {
                 await Refresh();
             }
@@ -215,7 +216,8 @@ namespace FlaschenpostTestMAUI.PageModels
 
         private void UpdateModels()
         {
-            Tasks = new ObservableCollection<TodoItem>(App.AppModel.Tasks);
+            //Tasks = new ObservableCollection<TodoItem>(App.AppModel.Tasks);
+            _tasksAll = new ObservableCollection<TodoItem>(App.AppModel.Tasks);
             Projects = new ObservableCollection<Project>(App.AppModel.Projects);
             foreach (var project in Projects)
             {

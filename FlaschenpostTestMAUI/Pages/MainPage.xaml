@@ -28,9 +28,19 @@
     </ContentPage.Behaviors>
 
     <Grid>
-        <RefreshView  IsRefreshing="{Binding IsRefreshing}"
+        <ActivityIndicator x:Name="activityIndicator" IsRunning="{Binding DataLoading}" HorizontalOptions="Center" VerticalOptions="Center"
+                   />
+        <RefreshView  IsRefreshing="{Binding IsRefreshing}" 
   Command="{Binding RefreshCommand}">
-        
+            <RefreshView.Triggers>
+                <DataTrigger TargetType="RefreshView" Binding="{Binding Source={x:Reference activityIndicator}, Path=IsRunning}" Value="True">
+                    <Setter Property="IsVisible" Value="False"></Setter>
+                </DataTrigger>
+                <DataTrigger TargetType="RefreshView" Binding="{Binding Source={x:Reference activityIndicator}, Path=IsRunning}" Value="False">
+                    <Setter Property="IsVisible" Value="True"></Setter>
+                </DataTrigger>
+
+            </RefreshView.Triggers>
                 <ScrollView>
                     <VerticalStackLayout Spacing="{StaticResource LayoutSpacing}" Padding="{StaticResource LayoutPadding}">
                         <Label Text="Projects" Style="{StaticResource Title2}"/>

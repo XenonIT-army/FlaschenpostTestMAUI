@@ -41,7 +41,7 @@
                             Command="{Binding NavigateToTaskCommand, Source={RelativeSource AncestorType={x:Type pageModels:IProjectTaskPageModel}}, x:DataType=pageModels:IProjectTaskPageModel}" 
                             CommandParameter="{Binding .}"/>
                     </Grid.GestureRecognizers>
-                    <CheckBox Grid.Column="0" IsChecked="{Binding IsCompleted, Mode=OneTime}" VerticalOptions="Center" CheckedChanged="CheckBox_CheckedChanged"/>
+                    <CheckBox Grid.Column="0" IsChecked="{Binding IsCompleted}" VerticalOptions="Center" CheckedChanged="CheckBox_CheckedChanged"/>
                     
 
                     <VerticalStackLayout VerticalOptions="Start" Margin="0,0,0,10" Spacing="5"  Grid.Column="1" >
@@ -51,6 +51,14 @@
                                     <Span Text="Created time: "  FontAttributes="Bold" />
                                     <Span Text="{Binding CreatedAt}" FontAttributes="Bold" />
                                   
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                        <Label FontSize="Micro">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="Due time: "  FontAttributes="Bold" />
+                                    <Span Text="{Binding DueDate}" FontAttributes="Bold" />
                                 </FormattedString>
                             </Label.FormattedText>
                         </Label>

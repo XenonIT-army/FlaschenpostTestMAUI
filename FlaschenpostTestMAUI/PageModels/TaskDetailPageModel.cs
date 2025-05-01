@@ -172,10 +172,14 @@ namespace FlaschenpostTestMAUI.PageModels
 
             _task.DueDate = DueDate + TimeDue;
 
-            if (_task.IsCompleted && _task.CompletedAt == null)
-            {
-                _task.CompletedAt = DateTime.Now;
-            }
+            //if (_task.IsCompleted && _task.CompletedAt == null)
+            //{
+            //    _task.CompletedAt = DateTime.Now;
+            //}
+            //else if(!_task.IsCompleted)
+            //{
+            //    _task.CompletedAt = Dat;
+            //}
 
             if (_task.Id > 0)
             {
@@ -183,7 +187,23 @@ namespace FlaschenpostTestMAUI.PageModels
                 var item = App.AppModel.Tasks.Where(x => x.Id == _task.Id).FirstOrDefault();
                 if (item != null)
                 {
-                    item = _task;
+                    item.Title = _task.Title;
+                    item.Description = _task.Description;
+                    item.Priority = _task.Priority;
+                    item.DueDate = _task.DueDate;
+                    item.ProjectId = _task.ProjectId;
+                    if (_task.IsCompleted && !item.IsCompleted)
+                    {
+                        _task.CompletedAt = DateTime.Now;
+                        item.CompletedAt = DateTime.Now;
+                    }
+                    else if (!_task.IsCompleted && item.IsCompleted)
+                    {
+                        _task.CompletedAt = null;
+                        item.CompletedAt = null;
+                    }
+                    item.IsCompleted = _task.IsCompleted;
+
                 }
             }
             else

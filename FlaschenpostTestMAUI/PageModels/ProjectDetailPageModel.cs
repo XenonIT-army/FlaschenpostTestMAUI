@@ -159,7 +159,10 @@ namespace FlaschenpostTestMAUI.PageModels
                 var item = App.AppModel.Projects.Where(x => x.Id == _project.Id).FirstOrDefault();
                 if (item != null)
                 {
-                    item = _project;
+                    item.Title = _project.Title;
+                    item.Description = _project.Description;
+                    item.CategoryId = _project.CategoryId;
+                    item.Icon = _project.Icon;
                 }
             }
             else
